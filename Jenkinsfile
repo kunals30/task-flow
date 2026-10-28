@@ -72,7 +72,7 @@ pipeline {
                                 set -eu
 
                                 "$SONAR_SCANNER_HOME/bin/sonar-scanner" \
-                                  -Dsonar.projectKey=task-flow \
+                                  -Dsonar.projectKey=Task-flow \
                                   -Dsonar.projectName="Task Flow" \
                                   -Dsonar.sources=client/src,server/src \
                                   -Dsonar.tests=server/tests \
