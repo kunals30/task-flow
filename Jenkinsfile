@@ -9,7 +9,7 @@ pipeline {
     }
 
     environment {
-        REGISTRY  = '10.0.1.212:8084'
+        REGISTRY   = '10.0.1.212:8084'
         IMAGE_NAME = 'task-flow'
     }
 
@@ -23,9 +23,11 @@ pipeline {
         stage('Verify Environment') {
             steps {
                 sh '''
+                    set -eu
                     node --version
                     npm --version
                     docker --version
+
                     test -f package.json
                     test -f package-lock.json
                     test -f Dockerfile
@@ -63,22 +65,20 @@ pipeline {
                     def scannerHome = tool 'SonarScanner'
 
                     withSonarQubeEnv('SonarQube') {
-                        withCredentials([
-                            string(
-                                credentialsId: 'sonar-task-flow-token',
-                                variable: 'SONAR_TOKEN'
-                            )
+                        withEnv([
+                            "SONAR_SCANNER_HOME=${scannerHome}"
                         ]) {
-                            sh """
-                                '${scannerHome}/bin/sonar-scanner' \
+                            sh '''
+                                set -eu
+
+                                "$SONAR_SCANNER_HOME/bin/sonar-scanner" \
                                   -Dsonar.projectKey=task-flow \
-                                  -Dsonar.projectName='Task Flow' \
+                                  -Dsonar.projectName="Task Flow" \
                                   -Dsonar.sources=client/src,server/src \
                                   -Dsonar.tests=server/tests \
                                   -Dsonar.sourceEncoding=UTF-8 \
-                                  -Dsonar.exclusions=**/node_modules/**,**/dist/** \
-                                  -Dsonar.token=\\$SONAR_TOKEN
-                            """
+                                  -Dsonar.exclusions=**/node_modules/**,**/dist/**
+                            '''
                         }
                     }
                 }
@@ -96,6 +96,8 @@ pipeline {
         stage('Docker Build') {
             steps {
                 sh '''
+                    set -eu
+
                     docker build \
                       -t "$REGISTRY/$IMAGE_NAME:$BUILD_NUMBER" \
                       -t "$REGISTRY/$IMAGE_NAME:latest" \
@@ -114,7 +116,9 @@ pipeline {
                     )
                 ]) {
                     sh '''
+                        set -eu
                         set +x
+
                         printf '%s' "$NEXUS_PASSWORD" |
                           docker login "$REGISTRY" \
                             --username "$NEXUS_USERNAME" \
@@ -132,10 +136,15 @@ pipeline {
 
     post {
         success {
-            echo 'CI pipeline succeeded. Image pushed to Nexus.'
+            echo 'SUCCESS: Tests, SonarQube, Quality Gate, Docker build and Nexus push completed.'
         }
+
         failure {
-            echo 'Pipeline failed. Check the failed stage in the Jenkins console output.'
+            echo 'FAILED: Check the Jenkins console output for the first failed stage.'
+        }
+
+        always {
+            echo 'Task Flow CI pipeline finished.'
         }
     }
 }
