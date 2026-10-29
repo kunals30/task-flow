@@ -13,7 +13,7 @@ export function TopNav({ onMenu, onNewTask }: Props) {
         </div>
       </div>
       <button className="btn-primary" onClick={onNewTask}>
-        <span className="text-base leading-none">+</span> New task
+        <span className="text-base leading-none">+</span> New work
       </button>
     </header>
   );
