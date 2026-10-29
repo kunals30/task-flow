@@ -113,7 +113,7 @@ export default function App() {
               <div className="flex flex-col items-center gap-2 py-16 text-center">
                 <p className="text-sm font-medium text-slate-900">{hasFilters ? "No tasks match your filters" : "No tasks yet"}</p>
                 <p className="text-sm text-slate-500">{hasFilters ? "Try adjusting your search or filters." : "Create your first task to get started."}</p>
-                {!hasFilters && <button className="btn-primary mt-2" onClick={() => setDialog({ kind: "create" })}>+ New work</button>}
+                {!hasFilters && <button className="btn-primary mt-2" onClick={() => setDialog({ kind: "create" })}>+ New Task</button>}
               </div>
             ) : (
               <TaskTable tasks={tasks} busyId={busyId} onEdit={(task) => setDialog({ kind: "edit", task })}
